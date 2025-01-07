@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "synthego_ice"
+dynamic = ["version"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: PyPy",
+  "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Text Processing :: Markup :: HTML",
+]
+# dependencies = ["typing-extensions>=3.10.0.0", "packaging>=20.9"]
+requires-python = ">=3.9"
+
+[project.optional-dependencies]
+#test = ["pytest>=6.2.4", "syrupy>=4.6.0"]
+#dev = [
+#  "black>=24.2.0",
+#  "flake8>=6.0.0",
+#  "Flake8-pyproject",
+#  "isort>=5.11.2",
+#  "pyright>=1.1.348",
+#  "pre-commit>=2.15.0",
+#  "wheel",
+#  "build",
+#]
+
+[tool.setuptools]
+packages = ["synthego_ice"]
+include-package-data = true
+zip-safe = false
+
+[tool.setuptools.package-data]
+htmltools = ["py.typed"]
+
+[tool.flake8]
+ignore = "E203, E302, E402, E501, E704, F403, F405, W503"
+extend-exclude = "docs, .venv, venv, typings, e2e, build"
