@@ -315,3 +315,11 @@ def multiple_sanger_analysis_cli():
                              verbose=verbose,
                              single_line=args.line,
                              allprops=allprops)
+
+
+    def main():
+        print("Running synthego_ice CLI")
+    if __name__ == "__main__":
+        main()
+
+
