@@ -4,6 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ice"
+version = "0.1"
 dynamic = ["version"]
 classifiers = [
   "Development Status :: 5 - Production/Stable",
@@ -21,7 +22,8 @@ classifiers = [
 ]
 # dependencies = ["typing-extensions>=3.10.0.0", "packaging>=20.9"]
 requires-python = ">=3.9"
-
+[project.scripts]
+synthego_ice = "synthego_ice.analysis:main"
 [project.optional-dependencies]
 #test = ["pytest>=6.2.4", "syrupy>=4.6.0"]
 #dev = [
