@@ -317,8 +317,8 @@ def multiple_sanger_analysis_cli():
                              allprops=allprops)
 
 
-    def main():
-        print("Running synthego_ice CLI")
+def main():
+    print("Running synthego_ice CLI")
     if __name__ == "__main__":
         main()
 
