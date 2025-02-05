@@ -40,7 +40,10 @@ synthego_ice_batch = "synthego_ice.analysis:multiple_sanger_analysis_cli"
 test = ["pytest>=6.2.5", "pytest-cov>=2.12.1"]
 
 [tool.setuptools]
-packages = ["."]
+find_namespace_packages = { where = ["src"] }  # Assuming your packages are in the 'src' directory
+include_package_data = true
+zip_safe = false
+
 
 [tool.setuptools.package-data]
 synthego_ice = ["*.txt", "*.rst", "*.md"]
