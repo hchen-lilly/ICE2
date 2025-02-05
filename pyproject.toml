@@ -23,7 +23,7 @@ synthego_ice = "ice.analysis:single_sanger_analysis_cli"
 synthego_ice_batch = "ice.analysis:multiple_sanger_analysis_cli"
 
 [tool.setuptools]
-# Include any additional setup configurations here, properly formatted.
+package-data = {"ice": ["data/*.dat", "*.txt", "*.rst", "*.md"]}
 
 [tool.setuptools.package-data]
 "" = ["*.txt", "*.rst", "*.md"]
