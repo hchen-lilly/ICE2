@@ -57,29 +57,3 @@ class PairAlignment:
         self.all_aligned_seqs = (str(aln[0]), str(aln[1]))
         self.all_aligned_clustal = self.align_list_to_clustal(self.all_aligned_seqs, "control", "edited")
 
-
-class DonorAlignment(PairAlignment):
-    """
-    Handles alignment between control and donor sequences.
-    """
-
-    def __init__(self, control_seq, donor_seq):
-        super().__init__(control_seq, donor_seq)
-        self.align_ssodn()
-
-    def align_ssodn(self):
-        aligner = PairwiseAligner()
-        aligner.mode = "local"
-        aligner.match_score = 2
-        aligner.mismatch_score = -1
-        aligner.open_gap_score = -6
-        aligner.extend_gap_score = -0.5
-
-        alignments = list(aligner.align(self.seq1, self.seq2))
-
-        if not alignments:
-            raise ValueError("No valid alignment found between control and donor sequences")
-
-        aln = alignments[0]
-        self.all_aligned_seqs = (str(aln[0]), str(aln[1]))
-        self.all_aligned_clustal = self.align_list_to_clustal(self.all_aligned_seqs, 'control', 'donor')

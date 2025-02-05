@@ -6,6 +6,8 @@ from scipy.optimize import nnls
 from scipy.stats.stats import pearsonr
 from sklearn import linear_model
 import re
+import pandas as pd
+
 from ice.classes.edit_proposal_creator import EditProposalCreator
 from ice.classes.guide_target import GuideTarget
 from ice.classes.ice_result import ICEResult
@@ -108,3 +110,33 @@ class SangerAnalysis:
         generate_discordance_indel_files(self, self.results, to_file=indel_file)
         write_contribs_json(self, self.base_outputname + "contribs.json")
 
+
+def multiple_sanger_analysis(definition_file, output_dir):
+    """
+    Runs batch ICE analysis from an Excel definition file.
+    """
+
+    input_df = pd.read_excel(definition_file)
+    results = []
+
+    for _, experiment in input_df.iterrows():
+        try:
+            control_sequence_path = experiment['Control File']
+            edit_sequence_path = experiment['Experiment File']
+            guide = experiment['Guide Sequence']
+
+            sa = SangerAnalysis()
+            sa.initialize_with(control_sequence_path, edit_sequence_path, guide)
+            sa.analyze_sample()
+
+            results.append([experiment['Label'], sa.results.edit_eff])
+
+        except Exception as e:
+            print(f"Error processing {experiment['Label']}: {e}")
+
+    if results:
+        out_file = os.path.join(output_dir, "batch_results.xlsx")
+        with pd.ExcelWriter(out_file, engine='openpyxl') as writer:
+            pd.DataFrame(results, columns=["Label", "Edit Efficiency"]).to_excel(writer, sheet_name="Results")
+
+        return results
