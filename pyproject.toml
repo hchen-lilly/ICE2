@@ -19,6 +19,14 @@ classifiers = [
   "Topic :: Software Development :: Libraries :: Python Modules",
   "Topic :: Text Processing :: Markup :: HTML",
 ]
+
+[tool.setuptools.entry_points]
+console_scripts = [
+    "synthego_ice = synthego_ice.analysis:single_sanger_analysis_cli",
+    "synthego_ice_batch = synthego_ice.analysis:multiple_sanger_analysis_cli",
+]
+
+
 # dependencies = ["typing-extensions>=3.10.0.0", "packaging>=20.9"]
 requires-python = ">=3.9"
 [project.scripts]
