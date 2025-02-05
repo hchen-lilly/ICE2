@@ -25,8 +25,8 @@ synthego_ice_batch = "ice.analysis:multiple_sanger_analysis_cli"
 [tool.setuptools]
 # Ensure this part complies with the new schema or remove it if it continues to cause errors
 
-# Correctly define package data if needed
 package-data = {"": ["*.txt", "*.rst", "*.md"], "ice": ["data/*.dat"]}
+
 
 # If using find_namespace, ensure it is correctly placed under `[tool.setuptools.find_packages]` if supported or configure manually in setup.py
 
