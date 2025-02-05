@@ -23,8 +23,13 @@ synthego_ice = "ice.analysis:single_sanger_analysis_cli"
 synthego_ice_batch = "ice.analysis:multiple_sanger_analysis_cli"
 
 [tool.setuptools]
-package-data = {"ice": ["data/*.dat", "*.txt", "*.rst", "*.md"]}
+packages = ["ice"]
+include-package-data = true
+zip-safe = false
 
 [tool.setuptools.package-data]
-"" = ["*.txt", "*.rst", "*.md"]
-"ice" = ["data/*.dat"]
+htmltools = ["py.typed"]
+
+[tool.flake8]
+ignore = "E203, E302, E402, E501, E704, F403, F405, W503"
+extend-exclude = "docs, .venv, venv, typings, e2e, build"
