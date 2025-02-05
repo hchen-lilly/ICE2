@@ -1,31 +1,3 @@
-"""
-Copyright 2018 Synthego Corporation All Rights Reserved
-
-The Synthego ICE software was developed at Synthego Corporation.
-
-Permission to use, copy, modify and distribute any part of Synthego ICE for
-educational, research and non-profit purposes, without fee, and without a
-written agreement is hereby granted, provided that the above copyright notice,
-this paragraph and the following paragraphs appear in all copies.
-
-Those desiring to incorporate this Synthego ICE software into commercial
-products or use for commercial purposes should contact Synthego support at Ph:
-(888) 611-6883 ext:1, E-MAIL: support@synthego.com.
-
-In no event shall Synthego Corporation be liable to any party for direct,
-indirect, special, incidental, or consequential damages, including lost
-profits, arising out of the use of Synthego ICE, even if Synthego Corporation
-has been advised of the possibility of such damage.
-
-The Synthego ICE tool provided herein is on an "as is" basis, and the Synthego
-Corporation has no obligation to provide maintenance, support, updates,
-enhancements, or modifications. The Synthego Corporation makes no
-representations and extends no warranties of any kind, either implied or
-express, including, but not limited to, the implied warranties of
-merchantability or fitness for a particular purpose, or that the use of
-Synthego ICE will not infringe any patent, trademark or other rights.
-"""
-
 import argparse
 import os
 import traceback
@@ -44,23 +16,12 @@ from .__version__ import __version__
 
 def single_sanger_analysis(control_path, sample_path, base_outputname, guide, donor=None, verbose=False,
                            allprops=False):
-    """
-
-    :param control_path: path to control ab1 file
-    :param sample_path: path to sample ab1 file
-    :param base_outputname: path to output (eg, /path/to/out/basename) will be saved using basename
-    :param guide: RNA/DNA sequence of guide
-    :param verbose: verbosity True/False
-    :return: results dictionary
-    """
-
     if control_path is None or not os.path.exists(control_path):
         raise Exception('Control @ {} not found'.format(control_path))
 
     if not os.path.exists(sample_path):
         raise Exception('Experiment sample @ {} not found'.format(sample_path))
 
-    # create the base directory if this location doesn't exist
     base_dir = os.path.join(*os.path.split(os.path.abspath(base_outputname))[:-1])
     if verbose:
         print('Base dir: %s' % base_dir)
@@ -84,44 +45,30 @@ def single_sanger_analysis(control_path, sample_path, base_outputname, guide, do
 
     except Exception as e:
         results = ICEResult()
-
         print('Exception Caught!')
         traceback.print_exc()
-        if isinstance(e,KeyError):
-            return results.to_json(sa.guide_targets, [';'.join(sa.warnings)])
-        else:
-            return results.to_json(sa.guide_targets, [str(e)])
+        return results.to_json(sa.guide_targets, [str(e)])
 
 
 def single_sanger_analysis_cli():
-    """ provides command line arg parsing for single sample analysis"""
-
     parser = argparse.ArgumentParser(description='Analyze Sanger reads to Infer Crispr Edit outcomes')
-    parser.add_argument('--control', dest='control', help='The wildtype / unedited ab1 file (REQUIRED)', required=True)
-    parser.add_argument('--edited', dest='edited', help='The edited ab1 file (REQUIRED)', required=True, default=None)
-    parser.add_argument('--target', dest='target', help='Target sequence(s) (17-23 bases, RNA or DNA, comma separated), (REQUIRED)',
-                        required=True)
-    parser.add_argument('--out', dest='out', help='Output base path (Defaults to ./results/single)', required=False,
-                        default=None)
-    parser.add_argument('--donor', dest='donor', help='Donor DNA sequence for HDR (Optional)', required=False,
-                        default=None)
+    parser.add_argument('--control', dest='control', required=True, help='The wildtype / unedited ab1 file (REQUIRED)')
+    parser.add_argument('--edited', dest='edited', required=True, help='The edited ab1 file (REQUIRED)')
+    parser.add_argument('--target', dest='target', required=True, help='Target sequence(s) (17-23 bases, RNA or DNA)')
+    parser.add_argument('--out', dest='out', default=None, help='Output base path (Defaults to ./results/single)')
+    parser.add_argument('--donor', dest='donor', default=None, help='Donor DNA sequence for HDR (Optional)')
     parser.add_argument('--verbose', dest='verbose', action='store_true')
     parser.add_argument('--version', action='version', version='%(prog)s {version}'.format(version=__version__))
-    parser.add_argument('--allprops', dest='allprops', action='store_true', default=False, help="Output all Edit Proposals, even if they have zero contribution")
+    parser.add_argument('--allprops', dest='allprops', action='store_true', default=False,
+                        help="Output all Edit Proposals, even if they have zero contribution")
 
     args = parser.parse_args()
 
     assert os.path.isfile(args.control)
     assert os.path.isfile(args.edited)
 
-    if args.out is None:
-        out_dir = os.path.join(os.path.abspath('.'), 'results', 'single')
-    else:
-        out_dir = os.path.abspath(args.out)
-
-    base_dir = os.path.join(*os.path.split(os.path.abspath(out_dir))[:-1])
-    if not os.path.exists(base_dir):
-        os.makedirs(base_dir, exist_ok=True)
+    out_dir = os.path.abspath(args.out) if args.out else os.path.join(os.path.abspath('.'), 'results', 'single')
+    os.makedirs(os.path.dirname(out_dir), exist_ok=True)
 
     print('Synthego ICE (https://synthego.com)')
     print('Version: {}'.format(__version__))
@@ -135,132 +82,80 @@ def single_sanger_analysis_cli():
                            allprops=args.allprops)
 
 
-def XLSDictReader(f, sheet_index=0):
-    book    = xlrd.open_workbook(file_contents=mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ))
-    sheet   = book.sheet_by_index(sheet_index)
-    headers = dict( (i, sheet.cell_value(0, i) ) for i in range(sheet.ncols) )
-
-    return ( dict( (headers[j], sheet.cell_value(i, j)) for j in headers ) for i in range(1, sheet.nrows) )
-
-def multiple_sanger_analysis(definition_file, output_dir,
-                             data_dir=None,
-                             verbose=False,
-                             single_line=None,
-                             allprops=False):
-    '''
-    :param definition_file: input excel file that defines sample/control/data associations
-    :param output_dir: output directory
-    :return:
-    '''
-
-
-
-
+def multiple_sanger_analysis(definition_file, output_dir, data_dir=None, verbose=False, single_line=None, allprops=False):
     input_df = pd.read_excel(definition_file)
-
     input_df = input_df.rename(columns={"Donor Sequence": "Donor", "Control": "Control File", "Experiment": "Experiment File"})
 
     results = []
-
     fails = []
-
     jobs = []
     n = 0
+
     for m, experiment in input_df.iterrows():
-
         label = experiment['Label']
-
-        base_outputname = os.path.join(output_dir, '%s-%s' % (n, label))
+        base_outputname = os.path.join(output_dir, f'{n}-{label}')
 
         control_sequence_file = experiment['Control File']
-
         edit_sequence_file = experiment['Experiment File']
-
         guide = experiment['Guide Sequence']
+        donor = experiment['Donor'] if 'Donor' in experiment and is_nuc_acid(experiment['Donor']) else None
 
-        if 'Donor' in experiment and is_nuc_acid(experiment['Donor']):
-            donor = experiment['Donor']
-        else:
-            donor = None
-
-        print(donor)
         try:
             if pd.isnull(control_sequence_file):
-                raise IOError("Control filepath not specified at line {} in definition file".format(n+1))
+                raise IOError(f"Control filepath not specified at line {n+1} in definition file")
             if pd.isnull(edit_sequence_file):
-                raise IOError("Edit filepath not specified at line {} in definition file".format(n+1))
+                raise IOError(f"Edit filepath not specified at line {n+1} in definition file")
 
             control_sequence_path = os.path.join(data_dir, control_sequence_file)
             edit_sequence_path = os.path.join(data_dir, edit_sequence_file)
 
-            if single_line is not None:
-                if n != single_line:
-                    continue
+            if single_line is not None and n != single_line:
+                continue
 
-            msg = "analyzing"
-            print("-" * 50, msg, n, experiment['Label'], guide)
-
+            print("-" * 50, "analyzing", n, experiment['Label'], guide)
 
             job_args = (control_sequence_path, edit_sequence_path, base_outputname, guide)
-            job_kwargs = {
-                'verbose': verbose,
-                'allprops': allprops,
-                'donor': donor
-            }
+            job_kwargs = {'verbose': verbose, 'allprops': allprops, 'donor': donor}
             result = single_sanger_analysis(*job_args, **job_kwargs)
             jobs.append((experiment, result))
 
         except Exception as e:
             fails.append(experiment)
             print("Single Sanger analysis failed", e)
-            import traceback, sys
-            traceback.print_exc(file=sys.stdout)
+            traceback.print_exc()
 
         n += 1
 
     for job in jobs:
         r = job[1]
         experiment = job[0]
-        if 'Donor' in experiment and is_nuc_acid(experiment['Donor']):
-            donor = experiment['Donor']
-        else:
-            donor = None
+        donor = experiment['Donor'] if 'Donor' in experiment and is_nuc_acid(experiment['Donor']) else None
 
         if r is not None:
-            tmp = [experiment['Label'], r['ice'], r['ice_d'], r['rsq'], r['hdr_pct'],r['ko_score'], r['guides'],
+            tmp = [experiment['Label'], r['ice'], r['ice_d'], r['rsq'], r['hdr_pct'], r['ko_score'], r['guides'],
                    r['notes'], experiment['Experiment File'], experiment['Control File'], donor]
         else:
             tmp = [experiment['Label'], 'Failed', '', '', '', '', '', '', '', '']
         results.append(tmp)
 
     if results:
-
         input_df = pd.DataFrame(results)
-        timestamp = '{:%Y-%m-%d-%H%M%S}'.format(datetime.datetime.now())
-        out_file = os.path.join(output_dir, "ice.results.{}.xlsx".format(timestamp))
+        timestamp = datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S')
+        out_file = os.path.join(output_dir, f"ice.results.{timestamp}.xlsx")
 
-        header = ["sample_name", "ice", 'ice_d', "r_squared", "hdr_pct","ko_score", "guides", "notes",
+        header = ["sample_name", "ice", 'ice_d', "r_squared", "hdr_pct", "ko_score", "guides", "notes",
                   "experiment_file", "control_file", "donor"]
         input_df.columns = header
-        # to json
-        out_dict = []
-        for r in results:
-            row = {}
-            for idx, c in enumerate(header):
-                row[c] = r[idx]
-            out_dict.append(row)
+
+        out_dict = [dict(zip(header, r)) for r in results]
         with open(out_file.replace('.xlsx', '.json'), 'w') as f:
             json.dump(out_dict, f, ensure_ascii=False)
 
-        with pd.ExcelWriter(out_file) as writer:
+        # ✅ FIX: Removed writer.close()
+        with pd.ExcelWriter(out_file, engine='openpyxl') as writer:
             input_df.to_excel(writer, sheet_name="Results")
-
-            md = {'version': __version__}
-            metadata = pd.DataFrame.from_dict([md])
+            metadata = pd.DataFrame.from_dict([{'version': __version__}])
             metadata.to_excel(writer, sheet_name='Metadata')
-            writer.close() ### feb 5
- 
-        #writer.save()
 
         return out_dict
     else:
@@ -269,50 +164,24 @@ def multiple_sanger_analysis(definition_file, output_dir,
 
 
 def multiple_sanger_analysis_cli():
-    """ provides command line arg parsing for batch analysis"""
-
     parser = argparse.ArgumentParser(description='Analyze Sanger reads to infer crispr edit outcomes')
-    parser.add_argument('--in', dest='input', help='Input definition file in Excel xlsx format (required)',
-                        required=True)
-    parser.add_argument('--out', dest='out', help='Output directory path (defaults to .)', required=False, default=None)
-    parser.add_argument('--data', dest='data', help='Data path, where .ab1 files are located (required)', required=True,
-                        default=None)
+    parser.add_argument('--in', dest='input', required=True, help='Input definition file in Excel xlsx format')
+    parser.add_argument('--out', dest='out', default=None, help='Output directory path (defaults to .)')
+    parser.add_argument('--data', dest='data', required=True, help='Data path, where .ab1 files are located')
     parser.add_argument('--verbose', dest='verbose', action='store_true', help='Display verbose output')
     parser.add_argument('--line', dest='line', default=None, type=int,
                         help="Only run specified line in the Excel xlsx definition file")
-    parser.add_argument('--allprops', dest='allprops', action='store_true', default=False, help="Output all Edit Proposals, even if they have zero contribution")
+    parser.add_argument('--allprops', dest='allprops', action='store_true', default=False,
+                        help="Output all Edit Proposals, even if they have zero contribution")
     parser.add_argument('--version', action='version', version='%(prog)s {version}'.format(version=__version__))
 
-    # parse args
     args = parser.parse_args()
-    verbose = False
-    if args.verbose:
-        verbose = True
-    if args.allprops:
-        allprops = True
-    else:
-        allprops = False
-
-    assert os.path.isfile(args.input)
-
-    if args.out is None:
-        out_dir = os.path.abspath(os.path.curdir)
-    else:
-        out_dir = os.path.abspath(args.out)
-    if not os.path.exists(out_dir):
-        os.makedirs(out_dir)
-
-    if args.data is None:
-        data_dir = os.path.abspath(os.path.curdir)
-    else:
-        data_dir = os.path.abspath(args.data)
+    out_dir = os.path.abspath(args.out) if args.out else os.path.abspath(os.path.curdir)
+    data_dir = os.path.abspath(args.data)
+    os.makedirs(out_dir, exist_ok=True)
 
     print('Synthego ICE (https://synthego.com)')
     print('Version: {}'.format(__version__))
 
-    multiple_sanger_analysis(args.input,
-                             output_dir=out_dir,
-                             data_dir=data_dir,
-                             verbose=verbose,
-                             single_line=args.line,
-                             allprops=allprops)
+    multiple_sanger_analysis(args.input, output_dir=out_dir, data_dir=data_dir,
+                             verbose=args.verbose, single_line=args.line, allprops=args.allprops)
