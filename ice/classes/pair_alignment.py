@@ -45,15 +45,16 @@ class PairAlignment:
                 json.dump(out_dict, f)
 
     def align_list_to_clustal(self, aln, name1, name2):
-        my_aln = ">{}\n".format(name1) + aln[0] + "\n" + ">{}\n".format(name2) + aln[1]
+        my_aln = f">{name1}\n{aln[0]}\n>{name2}\n{aln[1]}"
         f = StringIO(my_aln)
         aln_objs = list(AlignIO.parse(f, "fasta"))
-        
+
+        if not aln_objs:
+            return "No valid alignment found."
+
         output_handle = io.StringIO()
         AlignIO.write(aln_objs, output_handle, "clustal")
-        alignment_txt = output_handle.getvalue()
-        
-        return alignment_txt
+        return output_handle.getvalue()
 
     def align_all(self):
         seq1 = self.seq1
@@ -67,11 +68,14 @@ class PairAlignment:
         aligner.open_gap_score = -3
         aligner.extend_gap_score = -1
 
-        alignments = aligner.align(seq1, seq2)
+        alignments = list(aligner.align(seq1, seq2))
+
+        if not alignments:
+            raise ValueError("No valid alignment found between control and edited sequences")
+
         aln = alignments[0]
-        
         self.all_aligned_seqs = (str(aln[0]), str(aln[1]))
-        self.all_aligned_clustal = self.align_list_to_clustal((str(aln[0]), str(aln[1])), "control", "edited")
+        self.all_aligned_clustal = self.align_list_to_clustal(self.all_aligned_seqs, "control", "edited")
 
     @property
     def has_alignment(self):
@@ -91,21 +95,18 @@ class PairAlignment:
         aligner.open_gap_score = -2
         aligner.extend_gap_score = -1
 
-        alignments = aligner.align(seq1[aw[0]:aw[1]], seq2)
-        
-        try:
-            aln = alignments[0]
-        except Exception as e:
-            self.aln_clustal = "No alignment found\nCtrl {} to {}:{}\nEdited:{}\n".format(
-                aw[0], aw[1], seq1, seq2)
-            return False, ('No alignment found ' + str(e))
+        alignments = list(aligner.align(seq1[aw[0]:aw[1]], seq2))
 
+        if not alignments:
+            return False, "No alignment found in the specified window."
+
+        aln = alignments[0]
         aln_score = aln.score
         aln_score_normalized = (aln_score / (window_size * match_bonus)) * 100
         self.aln_clustal = self.align_list_to_clustal((str(aln[0]), str(aln[1])), "control_aln_window", "edited")
 
         if aln_score_normalized < 50:
-            return False, "Poor alignment upstream of cutsite: %0.2f percent of full score" % (aln_score_normalized)
+            return False, f"Poor alignment upstream of cutsite: {aln_score_normalized:.2f}% of full score"
 
         self.aln_seqs = (str(aln[0]), str(aln[1]))
         return True, "Alignment succeeded"
@@ -144,7 +145,7 @@ class DonorAlignment(PairAlignment):
         return self.seq2
 
     def align_ssodn(self):
-        print('starting to align ssodn')
+        print('Starting to align ssODN...')
         aligner = PairwiseAligner()
         aligner.mode = "local"
         aligner.match_score = self.MATCH_BONUS
@@ -152,9 +153,12 @@ class DonorAlignment(PairAlignment):
         aligner.open_gap_score = -6
         aligner.extend_gap_score = -0.5
 
-        alignments = aligner.align(self.control_seq, self.donor_seq)
-        alignment = alignments[0]
+        alignments = list(aligner.align(self.control_seq, self.donor_seq))
 
+        if not alignments:
+            raise ValueError("No valid alignment found between control and donor sequences")
+
+        alignment = alignments[0]
         self.all_aligned_seqs = (str(alignment[0]), str(alignment[1]))
-        self.all_aligned_clustal = self.align_list_to_clustal((str(alignment[0]), str(alignment[1])), 'control', 'donor')
+        self.all_aligned_clustal = self.align_list_to_clustal(self.all_aligned_seqs, 'control', 'donor')
 
