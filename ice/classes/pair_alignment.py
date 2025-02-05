@@ -31,13 +31,28 @@ class PairAlignment:
             with open(to_file, 'w') as f:
                 json.dump({'control': aln_seqs[0], 'edited': aln_seqs[1]}, f)
 
+##    def align_list_to_clustal(self, aln, name1, name2):
+##        my_aln = f">{name1}\n{aln[0]}\n>{name2}\n{aln[1]}"
+##        f = StringIO(my_aln)
+##        aln_objs = list(AlignIO.parse(f, "fasta"))
+##
+##        output_handle = io.StringIO()
+##        AlignIO.write(aln_objs, output_handle, "clustal")
+##        return output_handle.getvalue()
     def align_list_to_clustal(self, aln, name1, name2):
         my_aln = f">{name1}\n{aln[0]}\n>{name2}\n{aln[1]}"
         f = StringIO(my_aln)
-        aln_objs = list(AlignIO.parse(f, "fasta"))
+        
+        # Read the alignment as a MultipleSeqAlignment object
+        aln_objs = list(AlignIO.read(f, "fasta"))
 
+        # Ensure there's at least one alignment
+        if not aln_objs:
+            return "No valid alignment found."
+
+        # Write the alignment in Clustal format
         output_handle = io.StringIO()
-        AlignIO.write(aln_objs, output_handle, "clustal")
+        AlignIO.write([aln_objs], output_handle, "clustal")
         return output_handle.getvalue()
 
     def align_all(self):
