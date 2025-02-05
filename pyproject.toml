@@ -1,31 +1,17 @@
 [build-system]
-requires = ["setuptools>=40.8.0", "wheel"]
+requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "synthego_ice"
-version = "0.1.0"
-description = "A Python tool for CRISPR analysis."
+name = "ice"
+version = "0.1"
+description = "Description of your project"
 authors = [{name = "Your Name", email = "your.email@example.com"}]
-readme = "README.md"
+license = "MIT"
 requires-python = ">=3.9"
-license = {file = "LICENSE"}
-classifiers = [
-    "Development Status :: 5 - Production/Stable",
-    "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Topic :: Scientific/Engineering :: Bio-Informatics"
-]
 dependencies = [
-    "numpy>=1.21.4",
-    "pandas>=1.3.4",
-    "matplotlib>=3.4.3",
-    "scipy>=1.7.2"
+    "numpy",
+    "pandas"
 ]
 
 [project.urls]
@@ -33,31 +19,14 @@ homepage = "https://github.com/hchen-lilly/ICE2"
 documentation = "https://github.com/hchen-lilly/ICE2#readme"
 
 [project.scripts]
-synthego_ice = "synthego_ice.analysis:single_sanger_analysis_cli"
-synthego_ice_batch = "synthego_ice.analysis:multiple_sanger_analysis_cli"
-
-[project.optional-dependencies]
-test = ["pytest>=6.2.5", "pytest-cov>=2.12.1"]
+synthego_ice = "ice.analysis:single_sanger_analysis_cli"
+synthego_ice_batch = "ice.analysis:multiple_sanger_analysis_cli"
 
 [tool.setuptools]
-find_namespace_packages = { where = ["src"] }  # Assuming your packages are in the 'src' directory
-include_package_data = true
-zip_safe = false
+# Ensure this part complies with the new schema or remove it if it continues to cause errors
 
+# Correctly define package data if needed
+package-data = {"": ["*.txt", "*.rst", "*.md"], "ice": ["data/*.dat"]}
 
-[tool.setuptools.package-data]
-synthego_ice = ["*.txt", "*.rst", "*.md"]
-
-[tool.flake8]
-ignore = "E203, E302, E402, E501, E704, W503"
-max-line-length = 88
-exclude = [
-    ".git",
-    "__pycache__",
-    "build",
-    "dist",
-    "*.egg-info",
-    "venv",
-    ".venv"
-]
+# If using find_namespace, ensure it is correctly placed under `[tool.setuptools.find_packages]` if supported or configure manually in setup.py
 
